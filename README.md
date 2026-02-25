@@ -214,9 +214,10 @@ This distinction is critical for production design: the LLM is responsible for *
 
 ## 6. Wrap-Up & Reflection (5 min)
 
-1. Which classical agent architecture is the most similar to how a modern LLM agent works? What is the key architectural difference?
-2. Why is "reasoning" not a separate step in the classical perceive–act loop — and what does the ReAct pattern add?
-3. How would you explain the difference between the LLM as planner vs. the LLM as orchestrator to someone who has never used an agent platform?
+### Key Takeaways
+- Modern Agents Are Built on Classical Foundations
+- Reasoning Is the Architecture
+- The LLM Is Not the Agent
 
 > Next session: **Current Agentic AI Frameworks and Ecosystems**
 
