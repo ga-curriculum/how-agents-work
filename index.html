@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>How Agents Work — General Assembly BAA 3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Barlow+Condensed:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --black:#0d0d0d;--black2:#1a1a1a;--black3:#252525;--black4:#333;
+  --line:#2e2e2e;--line2:#404040;--gray-dk:#555;--gray:#888;
+  --gray-lt:#bbb;--white:#fff;--off-wh:#f5f5f5;
+  --GA-red:#e8333a;--GA-red2:#ff4a50;
+  --yellow:#f5c518;--green:#22c55e;--blue:#3b82f6;--purple:#a855f7;
+  --r:4px;--r-lg:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;background:var(--black);color:var(--white);font-size:16px;line-height:1.6;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--black2)}
+::-webkit-scrollbar-thumb{background:var(--black4);border-radius:3px}
+header{position:sticky;top:0;z-index:500;background:var(--black);border-bottom:2px solid var(--GA-red);display:flex;align-items:stretch;height:58px}
+.ga-logo{display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--line);flex-shrink:0;cursor:pointer}
+.ga-mark{width:32px;height:32px;background:var(--GA-red);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;color:#fff;border-radius:2px;flex-shrink:0}
+.ga-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--gray-lt);text-transform:uppercase;line-height:1.2}
+.ga-name span{display:block;font-size:10px;color:var(--gray);font-weight:600}
+.tab-bar{display:flex;align-items:stretch;overflow-x:auto;flex:1;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{display:flex;align-items:center;gap:6px;padding:0 18px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--gray);letter-spacing:.02em;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;position:relative;top:2px}
+.tab:hover{color:var(--white)}
+.tab.active{color:var(--white);border-bottom-color:var(--GA-red)}
+.hd-end{display:flex;align-items:center;padding:0 18px;border-left:1px solid var(--line);flex-shrink:0}
+.prog-chip{background:var(--GA-red);color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.section{display:none}
+.section.active{display:block}
+.wrap{max-width:860px;margin:0 auto;padding:48px 24px 80px}
+.eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--GA-red);margin-bottom:10px;display:block}
+h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(2.4rem,6vw,3.8rem);font-weight:900;line-height:1.05;letter-spacing:-.01em;color:#fff;margin-bottom:16px}
+h1 .red{color:var(--GA-red)}
+h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.01em;line-height:1.1;color:#fff;margin-bottom:8px}
+h2 .red{color:var(--GA-red)}
+h3{font-size:1rem;font-weight:700;color:#fff;margin-bottom:6px}
+.lead{font-size:1.05rem;color:var(--gray-lt);line-height:1.7;margin-bottom:28px;max-width:640px}
+.body-t{font-size:.95rem;color:var(--gray-lt);line-height:1.7}
+.hr{height:1px;background:var(--line);margin:36px 0}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:var(--r);font-family:'Barlow',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .15s;letter-spacing:.01em;white-space:nowrap}
+.btn-red{background:var(--GA-red);color:#fff;border-color:var(--GA-red)}
+.btn-red:hover{background:var(--GA-red2);border-color:var(--GA-red2);transform:translateY(-1px)}
+.btn-green{background:var(--green);color:var(--black);border-color:var(--green)}
+.btn-green:hover{background:#16a34a;border-color:#16a34a;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--gray-lt);border:2px solid var(--line2);padding:10px 20px;font-size:.88rem;font-weight:600;cursor:pointer;border-radius:var(--r);transition:all .15s}
+.btn-ghost:hover{border-color:var(--gray);color:#fff}
+.card{background:var(--black2);border:1px solid var(--line);border-radius:var(--r-lg);padding:28px;margin-bottom:16px}
+.card-rb{border-top:3px solid var(--GA-red)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.b-red{background:rgba(232,51,58,.18);color:var(--GA-red)}
+.b-green{background:rgba(34,197,94,.18);color:var(--green)}
+.b-yellow{background:rgba(245,197,24,.18);color:var(--yellow)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.a1{animation:fadeUp .35s ease both}
+.a2{animation:fadeUp .35s .1s ease both}
+.a3{animation:fadeUp .35s .2s ease both}
+/* INTRO */
+.hero-kicker{display:inline-flex;align-items:center;gap:8px;background:var(--black3);border:1px solid var(--line);border-radius:var(--r);padding:6px 14px;margin-bottom:20px;font-size:12px;font-weight:600;color:var(--gray-lt);letter-spacing:.04em}
+.hero-kicker .dot{width:8px;height:8px;background:var(--GA-red);border-radius:50%;flex-shrink:0}
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:32px}
+.obj-card{background:var(--black2);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;display:flex;gap:14px;align-items:flex-start}
+.obj-num{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;color:var(--GA-red);line-height:1;flex-shrink:0}
+.obj-body{font-size:.9rem;color:var(--gray-lt);line-height:1.55;padding-top:4px}
+.roadmap{display:flex;flex-direction:column}
+.rm-item{display:flex;align-items:flex-start;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.rm-item:last-child{border-bottom:none}
+.rm-dot{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;border:2px solid var(--line);background:var(--black3);color:var(--gray);transition:all .25s}
+.rm-dot.done{background:var(--green);border-color:var(--green);color:var(--black)}
+.rm-dot.active{background:var(--GA-red);border-color:var(--GA-red);color:#fff}
+.rm-label{font-size:.95rem;font-weight:600;color:var(--gray);transition:color .2s;padding-top:6px}
+.rm-label.active{color:#fff}
+.rm-label.done{color:var(--green);text-decoration:line-through}
+.rm-sub{font-size:.8rem;color:var(--gray-dk);margin-top:2px}
+/* LOOP */
+.loop-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:600px){.loop-grid{grid-template-columns:repeat(3,1fr)}}
+.ls{background:var(--black2);border:2px solid var(--line);border-radius:var(--r-lg);padding:16px 10px;text-align:center;cursor:pointer;transition:all .18s}
+.ls:hover{border-color:var(--line2)}
+.ls.active{border-color:var(--GA-red);background:rgba(232,51,58,.07)}
+.ls-num{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--gray-dk);margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase}
+.ls-icon{font-size:1.6rem;margin-bottom:8px;display:block}
+.ls-label{font-size:.82rem;font-weight:700;color:var(--gray-lt)}
+.ls.active .ls-label{color:var(--GA-red)}
+.loop-repeat{grid-column:1/-1;background:rgba(232,51,58,.1);border:1px dashed var(--GA-red);border-radius:var(--r);padding:8px 16px;text-align:center;font-size:.78rem;font-weight:700;color:var(--GA-red);font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em}
+.loop-detail{background:var(--black2);border:1px solid var(--line);border-left:4px solid var(--GA-red);border-radius:var(--r-lg);padding:20px 22px;font-size:.95rem;color:var(--gray-lt);line-height:1.7;min-height:80px;transition:all .2s;margin-bottom:22px}
+.loop-detail strong{color:#fff}
+/* AGENT TYPES */
+.type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:24px}
+.type-card{background:var(--black2);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;cursor:pointer;transition:border-color .18s,transform .18s;position:relative;overflow:hidden}
+.type-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--GA-red);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+.type-card:hover::before,.type-card.open::before{transform:scaleX(1)}
+.type-card:hover{border-color:var(--black4);transform:translateY(-2px)}
+.type-card.open{border-color:var(--GA-red)}
+.tc-num{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:900;color:var(--GA-red);line-height:1;margin-bottom:8px}
+.tc-icon{font-size:1.8rem;margin-bottom:8px;display:block}
+.tc-body{font-size:.88rem;color:var(--gray-lt);line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display:none}
+.type-card.open .tc-body{display:block}
+.tc-hint{font-size:.75rem;color:var(--gray-dk);margin-top:6px;font-style:italic}
+.type-card.open .tc-hint{display:none}
+/* COMPARISON TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:.88rem;margin-bottom:24px}
+.cmp-table th{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem;color:var(--gray);padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;background:var(--black3)}
+.cmp-table td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--gray-lt)}
+.cmp-table tr:last-child td{border-bottom:none}
+.cmp-table td:first-child{font-weight:700;color:#fff}
+.tick{color:var(--green);font-weight:700}
+.cross{color:var(--gray-dk)}
+.cmp-table tr.hl td{background:rgba(232,51,58,.05)}
+/* ANATOMY */
+.anatomy-scenario{background:var(--black3);border:1px solid var(--line);border-left:4px solid var(--GA-red);border-radius:var(--r-lg);padding:20px 22px;margin-bottom:20px;font-size:.95rem;color:var(--gray-lt);line-height:1.7}
+.anatomy-scenario strong{color:#fff}
+.anatomy-pool{background:var(--black3);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:18px}
+.pool-label{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-dk);margin-bottom:10px}
+.drag-chips{display:flex;flex-wrap:wrap;gap:8px;min-height:36px}
+.drag-chip{display:inline-flex;padding:8px 14px;border-radius:20px;background:var(--black2);border:1.5px solid var(--line2);color:var(--gray-lt);font-size:.85rem;font-weight:600;cursor:grab;user-select:none;transition:all .15s}
+.drag-chip:active{cursor:grabbing}
+.drag-chip:hover{border-color:var(--GA-red);color:#fff}
+.drag-chip.correct{background:rgba(34,197,94,.12);border-color:var(--green);color:var(--green);cursor:default}
+.drag-chip.wrong{background:rgba(232,51,58,.12);border-color:var(--GA-red);color:var(--GA-red);cursor:default}
+.anatomy-zones{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.anatomy-zone{border-radius:var(--r-lg);overflow:hidden}
+.az-head{padding:12px 18px;display:flex;align-items:center;gap:10px}
+.az-icon{font-size:1.2rem;flex-shrink:0}
+.az-title{font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.az-sub{font-size:.78rem;color:rgba(255,255,255,.45);margin-top:1px}
+.az-body{background:var(--black2);border:1px solid var(--line);border-top:none;border-radius:0 0 var(--r-lg) var(--r-lg);padding:12px;min-height:72px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;transition:background .15s}
+.az-body.dragover{background:var(--black3)}
+.az-empty{font-size:.8rem;color:var(--gray-dk);font-style:italic;width:100%;text-align:center;padding:14px 0}
+/* FAILURE */
+.fm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+@media(max-width:580px){.fm-grid{grid-template-columns:1fr}}
+.fm-zone{border-radius:var(--r-lg);overflow:hidden}
+.fm-head{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:opacity .15s}
+.fm-head:hover{opacity:.85}
+.fm-icon{font-size:1.2rem;flex-shrink:0}
+.fm-title{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;flex:1}
+.fm-count{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(255,255,255,.4)}
+.fm-toggle{font-size:.7rem;color:rgba(255,255,255,.3)}
+.fm-prev{display:none;padding:10px 14px;font-size:.8rem;color:var(--gray-lt);font-style:italic;line-height:1.55;border-top:1px solid rgba(255,255,255,.06)}
+.fm-prev.open{display:block}
+.fm-prev strong{color:#fff;font-style:normal}
+.fm-body{background:var(--black2);border:1px solid var(--line);border-top:none;border-radius:0 0 var(--r-lg) var(--r-lg);padding:10px;min-height:80px;display:flex;flex-direction:column;gap:6px}
+.fm-body.dragover{background:var(--black3)}
+.fm-empty{font-size:.8rem;color:var(--gray-dk);font-style:italic;text-align:center;padding:14px 0}
+.sym-chip{display:inline-flex;padding:7px 12px;border-radius:20px;background:var(--black3);border:1.5px solid var(--line2);color:var(--gray-lt);font-size:.82rem;font-weight:600;cursor:grab;user-select:none;transition:all .15s;line-height:1.4}
+.sym-chip:hover{border-color:var(--GA-red);color:#fff}
+.sym-chip.correct{background:rgba(34,197,94,.12);border-color:var(--green);color:var(--green);cursor:default}
+.sym-chip.wrong{background:rgba(232,51,58,.12);border-color:var(--GA-red);color:var(--GA-red);cursor:default}
+/* QUIZ */
+.qz-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.qz-meta span{font-size:.85rem;color:var(--gray);font-weight:500}
+.prog-bar{height:4px;background:var(--black3);border-radius:2px;margin-bottom:28px;overflow:hidden}
+.prog-fill{height:100%;background:var(--GA-red);border-radius:2px;transition:width .4s ease}
+.quiz-q{font-family:'Barlow Condensed',sans-serif;font-size:1.45rem;font-weight:700;line-height:1.3;color:#fff;margin-bottom:20px;letter-spacing:-.01em}
+.q-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.q-opt{background:var(--black2);border:2px solid var(--line);border-radius:var(--r-lg);padding:14px 18px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;font-size:.95rem;color:var(--gray-lt);transition:all .16s;text-align:left;width:100%}
+.q-opt:hover:not(.disabled){border-color:var(--GA-red);color:#fff;background:rgba(232,51,58,.05)}
+.q-opt.correct{border-color:var(--green);background:rgba(34,197,94,.07);color:#fff}
+.q-opt.wrong{border-color:var(--GA-red);background:rgba(232,51,58,.08);color:#fff}
+.q-opt.disabled{cursor:default}
+.opt-k{width:30px;height:30px;border-radius:6px;flex-shrink:0;background:var(--black3);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--gray);transition:all .16s}
+.q-opt.correct .opt-k{background:var(--green);border-color:var(--green);color:var(--black)}
+.q-opt.wrong .opt-k{background:var(--GA-red);border-color:var(--GA-red);color:#fff}
+.q-opt:hover:not(.disabled) .opt-k{border-color:var(--GA-red);color:var(--GA-red)}
+.fb-box{display:none;border-radius:var(--r-lg);padding:14px 18px;font-size:.92rem;line-height:1.6;margin-bottom:14px}
+.fb-box.show{display:flex;gap:10px;align-items:flex-start}
+.fb-box.ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+.fb-box.bad{background:rgba(232,51,58,.1);border:1px solid rgba(232,51,58,.3);color:#fca5a5}
+.fb-icon{font-size:1.1rem;flex-shrink:0}
+.qz-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.qz-score{font-size:.85rem;color:var(--gray);font-family:'JetBrains Mono',monospace}
+/* RESULTS */
+.results-ring{position:relative;width:120px;height:120px;flex-shrink:0}
+.results-ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;color:#fff;line-height:1}
+.ring-sub{font-size:.7rem;color:var(--gray);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.score-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.score-row:last-child{border-bottom:none}
+.score-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.score-bar-wrap{width:80px;height:3px;background:var(--black3);border-radius:2px;flex-shrink:0}
+.score-bar-fill{height:100%;border-radius:2px}
+.takeaway-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.takeaway-item:last-child{border-bottom:none}
+.tk-num{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:900;color:var(--GA-red);flex-shrink:0;line-height:1;padding-top:2px}
+.tk-txt{font-size:.92rem;color:var(--gray-lt);line-height:1.65}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ga-logo" onclick="nav('intro')">
+    <div class="ga-mark">GA</div>
+    <div class="ga-name">General Assembly<span>Build AI Agents · BAA 3.0</span></div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab active"  onclick="nav('intro')"   id="t-intro">⬡ Overview</div>
+    <div class="tab"         onclick="nav('loop')"    id="t-loop">↻ The Loop</div>
+    <div class="tab"         onclick="nav('types')"   id="t-types">◈ Agent Types</div>
+    <div class="tab"         onclick="nav('anatomy')" id="t-anatomy">⌖ Support Agent</div>
+    <div class="tab"         onclick="nav('failure')" id="t-failure">⚑ Failure Modes</div>
+    <div class="tab"         onclick="nav('quiz')"    id="t-quiz">◇ Knowledge Check</div>
+    <div class="tab"         onclick="nav('results')" id="t-results">★ Results</div>
+  </div>
+  <div class="hd-end"><div class="prog-chip" id="progressChip">0 / 4</div></div>
+</header>
+
+<!-- INTRO -->
+<div class="section active" id="s-intro">
+  <div class="wrap">
+    <div class="a1" style="padding-bottom:40px;border-bottom:1px solid var(--line);margin-bottom:36px">
+      <div class="hero-kicker"><div class="dot"></div>Hands-On Lab &nbsp;·&nbsp; Module 3 &nbsp;·&nbsp; BAA 3.0</div>
+      <h1>How Agents<br/><span class="red">Work</span></h1>
+      <p class="lead">From classical AI theory to modern LLM stacks — trace the perceive–reason–act loop from first principles, classify the four agent architectures, and diagnose the failure modes that break real systems.</p>
+      <button class="btn btn-red" onclick="nav('loop')">Start Lab →</button>
+    </div>
+    <span class="eyebrow">Learning Objectives</span>
+    <div class="obj-grid a2">
+      <div class="obj-card"><div class="obj-num">01</div><div class="obj-body">Identify the classical Perceive–Act loop and explain why iteration is what creates autonomy.</div></div>
+      <div class="obj-card"><div class="obj-num">02</div><div class="obj-body">Compare the four classical agent architectures: Reactive, Goal-Based, Utility-Based, and Learning.</div></div>
+      <div class="obj-card"><div class="obj-num">03</div><div class="obj-body">Map Perception, Reasoning, Tools, Action, and Memory onto a real customer service agent scenario.</div></div>
+      <div class="obj-card"><div class="obj-num">04</div><div class="obj-body">Diagnose the four structural failure modes and name a prevention strategy for each.</div></div>
+    </div>
+    <div class="hr"></div>
+    <span class="eyebrow">Your Lab Roadmap</span>
+    <div class="card a3">
+      <div class="roadmap">
+        <div class="rm-item"><div class="rm-dot active" id="dot-loop">1</div><div><div class="rm-label active" id="lbl-loop">The Classical Loop</div><div class="rm-sub">Perceive → Reason → Act → Observe → Repeat — click each step to explore</div></div></div>
+        <div class="rm-item"><div class="rm-dot" id="dot-types">2</div><div><div class="rm-label" id="lbl-types">Four Classical Agent Types</div><div class="rm-sub">Reactive · Goal-Based · Utility-Based · Learning — comparison table</div></div></div>
+        <div class="rm-item"><div class="rm-dot" id="dot-anatomy">3</div><div><div class="rm-label" id="lbl-anatomy">Support Agent Anatomy</div><div class="rm-sub">Drag 15 behaviors into the correct loop stage for a CS agent</div></div></div>
+        <div class="rm-item"><div class="rm-dot" id="dot-failure">4</div><div><div class="rm-label" id="lbl-failure">Structural Failure Modes</div><div class="rm-sub">Diagnose 12 symptoms across 4 failure categories</div></div></div>
+        <div class="rm-item"><div class="rm-dot" id="dot-quiz">5</div><div><div class="rm-label" id="lbl-quiz">Knowledge Check</div><div class="rm-sub">7 questions · agent loop mastery · 70% to pass</div></div></div>
+        <div class="rm-item"><div class="rm-dot" id="dot-results">—</div><div><div class="rm-label" id="lbl-results">Your Results</div><div class="rm-sub">Score breakdown · key takeaways</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOOP -->
+<div class="section" id="s-loop">
+  <div class="wrap">
+    <span class="eyebrow">Section 01</span>
+    <h2>The Classical <span class="red">Agent Loop</span></h2>
+    <p class="lead">Every agent — classical or modern — runs this loop. Click each step to understand what happens at that moment.</p>
+    <div class="card" style="background:rgba(232,51,58,.06);border-color:rgba(232,51,58,.2);padding:14px 18px;margin-bottom:20px">
+      <span style="font-size:.88rem;color:var(--gray-lt)">💡 <strong style="color:#fff">Key insight:</strong> The loop is what separates agents from generators. Without iteration, there is no autonomy — only prediction.</span>
+    </div>
+    <div class="loop-grid">
+      <div class="ls active" onclick="showStep(0)"><div class="ls-num">Step 01</div><span class="ls-icon">👁️</span><div class="ls-label">Perceive</div></div>
+      <div class="ls" onclick="showStep(1)"><div class="ls-num">Step 02</div><span class="ls-icon">🧠</span><div class="ls-label">Reason</div></div>
+      <div class="ls" onclick="showStep(2)"><div class="ls-num">Step 03</div><span class="ls-icon">⚡</span><div class="ls-label">Act</div></div>
+      <div class="ls" onclick="showStep(3)"><div class="ls-num">Step 04</div><span class="ls-icon">📊</span><div class="ls-label">Observe</div></div>
+      <div class="ls" onclick="showStep(4)"><div class="ls-num">Step 05</div><span class="ls-icon">🔄</span><div class="ls-label">Repeat</div></div>
+      <div class="loop-repeat">↩ &nbsp;REPEAT UNTIL GOAL IS MET &nbsp;↩</div>
+    </div>
+    <div class="loop-detail" id="loopDetail"><strong>PERCEIVE</strong> — The agent reads its environment. For a modern LLM agent, this means receiving a user message, an API event, a scheduled trigger, or a tool result. Without perception there is nothing to act on — this is the entry point of every loop iteration.</div>
+    <div class="hr"></div>
+    <span class="eyebrow">Why the Loop Matters</span>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:28px">
+      <div class="card" style="padding:18px;margin-bottom:0"><div style="font-size:1.4rem;margin-bottom:8px">🔁</div><h3 style="margin-bottom:6px">Correct Mistakes</h3><p style="font-size:.85rem;color:var(--gray-lt);line-height:1.55">If the first action fails, the agent tries a different approach instead of stopping.</p></div>
+      <div class="card" style="padding:18px;margin-bottom:0"><div style="font-size:1.4rem;margin-bottom:8px">🌊</div><h3 style="margin-bottom:6px">Adapt to Change</h3><p style="font-size:.85rem;color:var(--gray-lt);line-height:1.55">Environment shifts require re-evaluation and new plans — only possible through iteration.</p></div>
+      <div class="card" style="padding:18px;margin-bottom:0"><div style="font-size:1.4rem;margin-bottom:8px">🎯</div><h3 style="margin-bottom:6px">Achieve Autonomy</h3><p style="font-size:.85rem;color:var(--gray-lt);line-height:1.55">Multi-step goal pursuit requires continuous operation — not one-shot text generation.</p></div>
+      <div class="card" style="padding:18px;margin-bottom:0"><div style="font-size:1.4rem;margin-bottom:8px">📈</div><h3 style="margin-bottom:6px">Learn from Results</h3><p style="font-size:.85rem;color:var(--gray-lt);line-height:1.55">Feedback from actions informs better decisions. The loop transforms prediction into behavior.</p></div>
+    </div>
+    <button class="btn btn-red" onclick="markDone('loop');nav('types')">Next: Agent Types →</button>
+  </div>
+</div>
+
+<!-- TYPES -->
+<div class="section" id="s-types">
+  <div class="wrap">
+    <span class="eyebrow">Section 02</span>
+    <h2>Four Classical <span class="red">Agent Types</span></h2>
+    <p class="lead">From classical AI theory (Russell &amp; Norvig). Click each card to explore the architecture. Modern LLM agents are hybrid systems combining elements from all four.</p>
+    <div class="type-grid">
+      <div class="type-card" onclick="toggleTC(this,'tc1')">
+        <div class="tc-num">01</div><span class="tc-icon">⚡</span>
+        <h3>Reactive Agents</h3>
+        <p style="font-size:.85rem;color:var(--gray)">Stimulus → Response. No memory, no planning.</p>
+        <p class="tc-hint">Tap to expand ↓</p>
+        <div class="tc-body" id="tc1">No internal model of the world. Immediate, deterministic response to input. <strong>Example:</strong> A thermostat — temperature drops below threshold → turn on heater. No memory, no learning, no planning. Fast and reliable but brittle — can't handle anything outside its trigger conditions.</div>
+      </div>
+      <div class="type-card" onclick="toggleTC(this,'tc2')">
+        <div class="tc-num">02</div><span class="tc-icon">🎯</span>
+        <h3>Goal-Based Agents</h3>
+        <p style="font-size:.85rem;color:var(--gray)">Compare state vs. goal. Introduce planning.</p>
+        <p class="tc-hint">Tap to expand ↓</p>
+        <div class="tc-body" id="tc2">Evaluate actions based on: "Does this move me closer to the goal?" Goal-based agents introduce <strong>planning</strong> — the ability to evaluate future states and select actions that advance toward a defined objective. First type capable of genuine multi-step reasoning.</div>
+      </div>
+      <div class="type-card" onclick="toggleTC(this,'tc3')">
+        <div class="tc-num">03</div><span class="tc-icon">⚖️</span>
+        <h3>Utility-Based Agents</h3>
+        <p style="font-size:.85rem;color:var(--gray)">Optimize trade-offs. Maximize a utility function.</p>
+        <p class="tc-hint">Tap to expand ↓</p>
+        <div class="tc-body" id="tc3">Instead of binary goals, utility-based agents <strong>optimize trade-offs</strong>. Example: minimize cost ⚖️ maximize speed. They find the optimal balance — not just "yes/no" on a single goal. This is the foundation of modern recommendation and routing systems.</div>
+      </div>
+      <div class="type-card" onclick="toggleTC(this,'tc4')">
+        <div class="tc-num">04</div><span class="tc-icon">🧬</span>
+        <h3>Learning Agents</h3>
+        <p style="font-size:.85rem;color:var(--gray)">Update model from experience. Adapt over time.</p>
+        <p class="tc-hint">Tap to expand ↓</p>
+        <div class="tc-body" id="tc4">Four components: <strong>Performance Element</strong> (selects actions), <strong>Learning Element</strong> (improves from feedback), <strong>Critic</strong> (evaluates outcomes), <strong>Knowledge Base</strong> (stores experience). Most advanced classical type — closest to modern LLM agents.</div>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <span class="eyebrow">Comparative Table</span>
+    <p class="lead" style="margin-bottom:16px">Review before the quiz — you'll be asked which capabilities each type has.</p>
+    <div style="overflow-x:auto;margin-bottom:20px">
+      <table class="cmp-table">
+        <thead><tr><th>Agent Type</th><th>Memory</th><th>Planning</th><th>Optimization</th><th>Learning</th></tr></thead>
+        <tbody>
+          <tr><td>Reactive</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>Goal-Based</td><td class="cross" style="color:var(--yellow)">~</td><td class="tick">✓</td><td class="cross" style="color:var(--yellow)">~</td><td class="cross">✗</td></tr>
+          <tr><td>Utility-Based</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="cross">✗</td></tr>
+          <tr><td>Learning</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr class="hl"><td>Modern LLM Agent</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="background:rgba(232,51,58,.06);border-color:rgba(232,51,58,.2);padding:14px 18px;margin-bottom:20px">
+      <span style="font-size:.88rem;color:var(--gray-lt)">🤖 <strong style="color:#fff">Modern LLM agents are hybrid systems.</strong> The architecture wrapping the LLM determines which capabilities are active — the model alone decides nothing.</span>
+    </div>
+    <button class="btn btn-red" onclick="markDone('types');nav('anatomy')">Next: Support Agent Anatomy →</button>
+  </div>
+</div>
+
+<!-- ANATOMY -->
+<div class="section" id="s-anatomy">
+  <div class="wrap">
+    <span class="eyebrow">Section 03 · Lab Activity</span>
+    <h2>Support Agent <span class="red">Anatomy</span></h2>
+    <p class="lead">Diagram the agent loop for a customer service responder. Drag each behavior into the correct stage — Perception, Reasoning, Tools, Action, or Memory.</p>
+    <div class="anatomy-scenario">
+      <strong>Scenario:</strong> A customer submits a ticket: <em>"My order hasn't arrived — it's been 10 days and I need it urgently."</em> A fully autonomous support agent handles the entire resolution loop without human intervention. Your job is to map what happens at each stage of the loop.
+    </div>
+    <div class="anatomy-pool" id="anatomyPool">
+      <div class="pool-label">Unassigned behaviors — drag to the correct stage</div>
+      <div class="drag-chips" id="anatomyPoolChips"></div>
+    </div>
+    <div class="anatomy-zones" id="anatomyZones"></div>
+    <details style="margin-bottom:14px">
+      <summary style="font-size:.82rem;color:var(--gray-dk);cursor:pointer">On mobile? Tap to assign</summary>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px" id="mobileAnatomy"></div>
+    </details>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-red"   id="anatomyCheckBtn" onclick="checkAnatomy()" disabled>Check Diagram</button>
+      <button class="btn btn-ghost" id="anatomyNextBtn"  onclick="markDone('anatomy');nav('failure')" style="display:none">Next: Failure Modes →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAILURE -->
+<div class="section" id="s-failure">
+  <div class="wrap">
+    <span class="eyebrow">Section 04</span>
+    <h2>Structural <span class="red">Failure Modes</span></h2>
+    <p class="lead">Most agent failures are architectural — not model errors. Drag each symptom into the failure mode it belongs to. Tap a header to reveal the prevention strategy.</p>
+    <div class="card" style="background:rgba(245,197,24,.05);border-color:rgba(245,197,24,.2);padding:14px 18px;margin-bottom:20px">
+      <span style="font-size:.88rem;color:var(--gray-lt)">⚠️ 4 Failure Modes: Poor Task Decomposition · Tool Misalignment · Feedback Ignorance · Over-Autonomy</span>
+    </div>
+    <div class="anatomy-pool" id="fmPool">
+      <div class="pool-label">Undiagnosed symptoms — drag to assign</div>
+      <div class="drag-chips" id="fmPoolChips"></div>
+    </div>
+    <div class="fm-grid" id="fmGrid"></div>
+    <details style="margin-bottom:14px">
+      <summary style="font-size:.82rem;color:var(--gray-dk);cursor:pointer">On mobile? Tap to assign</summary>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px" id="mobileFailure"></div>
+    </details>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-red"   id="failureCheckBtn" onclick="checkFailure()" disabled>Diagnose All Symptoms</button>
+      <button class="btn btn-ghost" id="failureNextBtn"  onclick="markDone('failure');nav('quiz')" style="display:none">Next: Knowledge Check →</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="section" id="s-quiz">
+  <div class="wrap">
+    <span class="eyebrow">Section 05</span>
+    <h2>Knowledge <span class="red">Check</span></h2>
+    <p class="lead">Test your understanding. You need 70% or higher to mark this section complete.</p>
+    <div id="quizActive">
+      <div class="qz-meta"><span id="qMeta">Question 1 of 7</span><span id="qScoreTxt">Score: 0 / 0</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="qProg" style="width:0%"></div></div>
+      <div class="card card-rb">
+        <div class="quiz-q" id="quizQ"></div>
+        <div class="q-opts" id="quizOpts"></div>
+        <div class="fb-box" id="quizFB"></div>
+        <div class="qz-foot">
+          <button class="btn btn-red" id="qNextBtn" onclick="nextQ()" style="display:none">Continue →</button>
+          <div class="qz-score" id="qz-s"></div>
+        </div>
+      </div>
+    </div>
+    <div id="quizDone" style="display:none">
+      <div class="card card-rb">
+        <h3 style="font-size:1.2rem;margin-bottom:8px">Quiz Complete <span id="qBadge"></span></h3>
+        <p class="body-t" style="margin-bottom:20px" id="qMsg"></p>
+        <button class="btn btn-green" onclick="markDone('quiz');buildResults();nav('results')">See Your Results →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="section" id="s-results">
+  <div class="wrap">
+    <span class="eyebrow">Your Results</span>
+    <h2>Lab <span class="red">Complete</span></h2>
+    <div id="resultsBody"></div>
+  </div>
+</div>
+
+<script>
+// ─── Nav ──────────────────────────────────────────────────────────────────────
+const ALL_SECS=['intro','loop','types','anatomy','failure','quiz','results'];
+let completed=new Set(), sectionScores={};
+
+function nav(id){
+  ALL_SECS.forEach(s=>{
+    document.getElementById('s-'+s).classList.remove('active');
+    const t=document.getElementById('t-'+s);
+    if(t) t.classList.remove('active');
+  });
+  document.getElementById('s-'+id).classList.add('active');
+  const t=document.getElementById('t-'+id);
+  if(t) t.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='anatomy'&&!anatomyBuilt) buildAnatomy();
+  if(id==='failure'&&!failureBuilt) buildFailure();
+  if(id==='quiz'   &&!quizStarted)  initQuiz();
+}
+
+function markDone(key){
+  completed.add(key);
+  document.getElementById('progressChip').textContent=completed.size+' / 4';
+  const d=document.getElementById('dot-'+key);
+  const l=document.getElementById('lbl-'+key);
+  if(d){d.className='rm-dot done';d.textContent='✓';}
+  if(l){l.className='rm-label done';}
+}
+
+// ─── LOOP ─────────────────────────────────────────────────────────────────────
+const LOOP_DATA=[
+  {t:'<strong>PERCEIVE</strong> — The agent reads its environment. For a modern LLM agent, this means receiving a user message, an API event, a scheduled trigger, or a tool result. Without perception there is nothing to act on — this is the entry point of every loop iteration.'},
+  {t:'<strong>REASON</strong> — The agent interprets the goal and plans. The LLM decomposes the objective into sub-tasks, selects which tools to use, and decides what success looks like. This is genuine deliberation — not pattern matching. The quality of planning determines the quality of the outcome.'},
+  {t:'<strong>ACT</strong> — The agent executes using tools. It calls APIs, queries databases, runs code, sends messages. This is where intention becomes real-world effect — and where unintended consequences can occur. Permissions, guardrails, and schema validation matter most here.'},
+  {t:'<strong>OBSERVE</strong> — The agent evaluates what actually happened. Did the tool return expected output? Did the action succeed? Was there an error? This feedback signal is the agent\'s only window into reality — without it, errors compound silently and goals drift.'},
+  {t:'<strong>REPEAT</strong> — Based on what was observed, the agent decides: continue, adjust, retry, or escalate. Then it loops back. This cycle is what creates autonomy — the agent doesn\'t stop until the goal is met, an error is unresolvable, or a stopping condition is triggered.'},
+];
+
+function showStep(i){
+  document.querySelectorAll('.ls').forEach((el,idx)=>{
+    if(!el.classList.contains('loop-repeat')) el.classList.toggle('active',idx===i);
+  });
+  document.getElementById('loopDetail').innerHTML=LOOP_DATA[i].t;
+}
+
+// ─── TYPES ───────────────────────────────────────────────────────────────────
+function toggleTC(card,id){
+  const isOpen=card.classList.contains('open');
+  document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
+}
+
+// ─── ANATOMY DATA ─────────────────────────────────────────────────────────────
+const ANATOMY_ZONES=[
+  {id:'perception',label:'Perception',icon:'👁️',color:'#3b82f6',bg:'rgba(59,130,246,0.14)',desc:'Reading inputs from the environment — message, account data, prior context'},
+  {id:'reasoning', label:'Reasoning', icon:'🧠',color:'#a855f7',bg:'rgba(168,85,247,0.14)',desc:'Planning, classifying, and deciding the next action — powered by the LLM'},
+  {id:'tools',     label:'Tools',     icon:'🔧',color:'#e8333a',bg:'rgba(232,51,58,0.14)', desc:'Calling external systems — APIs, databases, knowledge bases'},
+  {id:'action',    label:'Action',    icon:'⚡',color:'#f5c518',bg:'rgba(245,197,24,0.14)',desc:'Taking real-world actions — sending replies, updating records, creating tasks'},
+  {id:'memory',    label:'Memory',    icon:'💾',color:'#22c55e',bg:'rgba(34,197,94,0.14)', desc:'Storing and retrieving context, preferences, and task progress across iterations'},
+];
+
+const ANATOMY_ITEMS=[
+  {id:'a1', text:'Reads the incoming customer ticket message',                            answer:'perception'},
+  {id:'a2', text:"Retrieves the customer's order history from the CRM",                  answer:'perception'},
+  {id:'a3', text:'Receives the carrier API result to evaluate whether to send the reply', answer:'perception'},
+  {id:'a4', text:'Classifies the issue as shipping delay vs. wrong item vs. refund',      answer:'reasoning'},
+  {id:'a5', text:'Decomposes resolution into: locate order → check carrier → draft reply',answer:'reasoning'},
+  {id:'a6', text:'Decides to escalate to a human agent if carrier returns an error',      answer:'reasoning'},
+  {id:'a7', text:'Queries the carrier API for real-time shipment tracking status',         answer:'tools'},
+  {id:'a8', text:'Searches the knowledge base for the refund policy on delayed orders',   answer:'tools'},
+  {id:'a9', text:'Calls the order management system to flag the shipment for review',      answer:'tools'},
+  {id:'a10',text:'Sends the drafted resolution reply to the customer via email',           answer:'action'},
+  {id:'a11',text:'Updates the ticket status to "Awaiting Carrier Confirmation"',           answer:'action'},
+  {id:'a12',text:'Creates a follow-up task if no carrier response arrives within 24 hours',answer:'action'},
+  {id:'a13',text:"Stores the conversation thread so the agent doesn't re-ask questions",  answer:'memory'},
+  {id:'a14',text:"Remembers the customer's preferred contact channel (email, not SMS)",   answer:'memory'},
+  {id:'a15',text:'Tracks which resolution steps have already been attempted this loop',   answer:'memory'},
+].sort(()=>Math.random()-.5);
+
+let anatomyBuilt=false, anatomyPlacements={}, anatomyChecked=false;
+
+function buildAnatomy(){
+  anatomyBuilt=true;
+  const pool=document.getElementById('anatomyPoolChips');
+  const mob=document.getElementById('mobileAnatomy');
+  ANATOMY_ITEMS.forEach(item=>{
+    pool.appendChild(makeAChip(item));
+    const row=document.createElement('div');
+    row.style.cssText='padding:10px;background:var(--black2);border-radius:4px;border:1px solid var(--line)';
+    const lbl=document.createElement('div');
+    lbl.style.cssText='font-size:.88rem;color:var(--gray-lt);margin-bottom:6px;line-height:1.4';
+    lbl.textContent=item.text;
+    const btns=document.createElement('div');
+    btns.style.cssText='display:flex;gap:4px;flex-wrap:wrap';
+    ANATOMY_ZONES.forEach(z=>{
+      const b=document.createElement('button');
+      b.style.cssText=`padding:3px 8px;border-radius:3px;border:1.5px solid ${z.color};background:transparent;font-size:.75rem;cursor:pointer;color:${z.color};font-weight:700`;
+      b.textContent=z.label;
+      b.addEventListener('click',()=>mobAAssign(item.id,z.id));
+      btns.appendChild(b);
+    });
+    row.appendChild(lbl); row.appendChild(btns); mob.appendChild(row);
+  });
+  const container=document.getElementById('anatomyZones');
+  ANATOMY_ZONES.forEach(z=>{
+    const zone=document.createElement('div');
+    zone.className='anatomy-zone';
+    zone.style.border=`1px solid ${z.color}30`;
+    const head=document.createElement('div');
+    head.className='az-head'; head.style.background=z.bg;
+    head.innerHTML=`<span class="az-icon">${z.icon}</span><div><div class="az-title" style="color:${z.color}">${z.label}</div><div class="az-sub">${z.desc}</div></div>`;
+    const body=document.createElement('div');
+    body.className='az-body'; body.id='azone-'+z.id;
+    body.innerHTML='<span class="az-empty">Drop behaviors here</span>';
+    body.addEventListener('dragover',e=>{e.preventDefault();body.classList.add('dragover');});
+    body.addEventListener('dragleave',()=>body.classList.remove('dragover'));
+    body.addEventListener('drop',e=>{
+      e.preventDefault(); body.classList.remove('dragover');
+      const id=e.dataTransfer.getData('text/plain');
+      if(anatomyChecked) return;
+      anatomyPlacements[id]=z.id;
+      const chip=document.getElementById('achip-'+id);
+      if(chip) chip.parentNode.removeChild(chip);
+      const empty=body.querySelector('.az-empty');
+      if(empty) empty.remove();
+      body.appendChild(makeAChip(ANATOMY_ITEMS.find(x=>x.id===id)));
+      updateAnatomyBtn();
+    });
+    zone.appendChild(head); zone.appendChild(body); container.appendChild(zone);
+  });
+}
+
+function makeAChip(item){
+  const c=document.createElement('div');
+  c.className='drag-chip'; c.id='achip-'+item.id;
+  c.textContent=item.text;
+  c.setAttribute('draggable','true');
+  c.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',item.id));
+  return c;
+}
+
+function mobAAssign(itemId,zoneId){
+  anatomyPlacements[itemId]=zoneId;
+  const chip=document.getElementById('achip-'+itemId);
+  if(chip) chip.parentNode.removeChild(chip);
+  const body=document.getElementById('azone-'+zoneId);
+  if(body){const empty=body.querySelector('.az-empty');if(empty)empty.remove();body.appendChild(makeAChip(ANATOMY_ITEMS.find(x=>x.id===itemId)));}
+  updateAnatomyBtn();
+}
+
+function updateAnatomyBtn(){
+  const all=ANATOMY_ITEMS.every(i=>anatomyPlacements[i.id]);
+  document.getElementById('anatomyCheckBtn').disabled=!all;
+}
+
+function checkAnatomy(){
+  anatomyChecked=true;
+  let correct=0;
+  ANATOMY_ITEMS.forEach(item=>{
+    const chip=document.getElementById('achip-'+item.id);
+    if(!chip) return;
+    if(anatomyPlacements[item.id]===item.answer){chip.classList.add('correct');correct++;}
+    else chip.classList.add('wrong');
+  });
+  sectionScores.anatomy={earned:correct,possible:ANATOMY_ITEMS.length};
+  document.getElementById('anatomyCheckBtn').style.display='none';
+  document.getElementById('anatomyNextBtn').style.display='inline-flex';
+}
+
+// ─── FAILURE DATA ─────────────────────────────────────────────────────────────
+const FAILURES=[
+  {id:'fd1',label:'Poor Task Decomposition',icon:'🗺️',color:'#e8333a',bg:'rgba(232,51,58,0.12)',
+   prev:'Structured planning prompts, step validation, and max-step limits.',
+   symptoms:['Agent repeats the same steps without making any progress','Agent stops before completing — skips critical resolution steps','Plan loops back to the start without ever reaching a stopping condition']},
+  {id:'fd2',label:'Tool Misalignment',icon:'🔧',color:'#3b82f6',bg:'rgba(59,130,246,0.12)',
+   prev:'Tool validation layer, input/output schemas, and constraint checks before execution.',
+   symptoms:["LLM selects a tool that doesn't match the required task",'Agent receives a structured error but fails to interpret it correctly','Wrong tool returns plausible-looking but incorrect data silently']},
+  {id:'fd3',label:'Feedback Ignorance',icon:'🔇',color:'#f5c518',bg:'rgba(245,197,24,0.1)',
+   prev:'Mandatory result evaluation after every action, with progress tracked against goal.',
+   symptoms:['Each wrong step makes the next step progressively worse','Agent gradually drifts away from the original customer objective','Accumulated errors cause unpredictable and irreversible behavior']},
+  {id:'fd4',label:'Over-Autonomy',icon:'⚠️',color:'#a855f7',bg:'rgba(168,85,247,0.12)',
+   prev:'Guardrails, logging, monitoring dashboards, and human-in-the-loop for critical paths.',
+   symptoms:['Agent takes actions far outside its intended operational scope','No visibility into what the agent is doing or why','When something goes wrong, there is no graceful fallback or degradation path']},
+];
+
+const ALL_SYMS=FAILURES.flatMap(f=>f.symptoms.map((t,i)=>({id:`${f.id}_${i}`,text:t,correct:f.id}))).sort(()=>Math.random()-.5);
+let failureBuilt=false, failurePlacements={}, failureChecked=false;
+
+function buildFailure(){
+  failureBuilt=true;
+  const pool=document.getElementById('fmPoolChips');
+  const mob=document.getElementById('mobileFailure');
+  ALL_SYMS.forEach(sym=>{
+    pool.appendChild(makeSChip(sym));
+    const row=document.createElement('div');
+    row.style.cssText='padding:10px;background:var(--black2);border-radius:4px;border:1px solid var(--line)';
+    const lbl=document.createElement('div');
+    lbl.style.cssText='font-size:.88rem;color:var(--gray-lt);margin-bottom:6px;line-height:1.4';
+    lbl.textContent=sym.text;
+    const btns=document.createElement('div');
+    btns.style.cssText='display:flex;gap:4px;flex-wrap:wrap';
+    FAILURES.forEach(fm=>{
+      const b=document.createElement('button');
+      b.style.cssText=`padding:3px 8px;border-radius:3px;border:1.5px solid ${fm.color};background:transparent;font-size:.75rem;cursor:pointer;color:${fm.color};font-weight:700`;
+      b.textContent=fm.label;
+      b.addEventListener('click',()=>mobSAssign(sym.id,fm.id));
+      btns.appendChild(b);
+    });
+    row.appendChild(lbl); row.appendChild(btns); mob.appendChild(row);
+  });
+  buildFMZones();
+}
+
+function makeSChip(sym){
+  const c=document.createElement('div');
+  c.className='sym-chip'; c.id='schip-'+sym.id;
+  c.textContent=sym.text;
+  c.setAttribute('draggable','true');
+  c.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',sym.id));
+  return c;
+}
+
+function mobSAssign(symId,fmId){
+  failurePlacements[symId]=fmId;
+  const chip=document.getElementById('schip-'+symId);
+  if(chip) chip.parentNode.removeChild(chip);
+  const body=document.getElementById('fmbody-'+fmId);
+  if(body){const empty=body.querySelector('.fm-empty');if(empty)empty.remove();body.appendChild(makeSChip(ALL_SYMS.find(x=>x.id===symId)));}
+  updateFMBtn(); updateFMCount(fmId);
+}
+
+function buildFMZones(){
+  const grid=document.getElementById('fmGrid'); grid.innerHTML='';
+  FAILURES.forEach(fm=>{
+    const zone=document.createElement('div');
+    zone.className='fm-zone'; zone.style.border=`1px solid ${fm.color}30`;
+    const head=document.createElement('div');
+    head.className='fm-head'; head.style.background=fm.bg;
+    head.innerHTML=`<span class="fm-icon">${fm.icon}</span><span class="fm-title" style="color:${fm.color}">${fm.label}</span><span class="fm-count" id="fmcount-${fm.id}">0 placed</span><span class="fm-toggle">▼</span>`;
+    head.addEventListener('click',()=>{
+      const p=document.getElementById('fmprev-'+fm.id);
+      const tog=head.querySelector('.fm-toggle');
+      const open=p.classList.contains('open');
+      p.classList.toggle('open',!open); tog.textContent=open?'▼':'▲';
+    });
+    const prev=document.createElement('div');
+    prev.className='fm-prev'; prev.id='fmprev-'+fm.id;
+    prev.innerHTML=`<strong>Prevention:</strong> ${fm.prev}`;
+    const body=document.createElement('div');
+    body.className='fm-body'; body.id='fmbody-'+fm.id;
+    body.innerHTML='<span class="fm-empty">Drop symptoms here</span>';
+    body.addEventListener('dragover',e=>{e.preventDefault();body.classList.add('dragover');});
+    body.addEventListener('dragleave',()=>body.classList.remove('dragover'));
+    body.addEventListener('drop',e=>{
+      e.preventDefault(); body.classList.remove('dragover');
+      const symId=e.dataTransfer.getData('text/plain');
+      if(failureChecked) return;
+      failurePlacements[symId]=fm.id;
+      const chip=document.getElementById('schip-'+symId);
+      if(chip) chip.parentNode.removeChild(chip);
+      const empty=body.querySelector('.fm-empty');
+      if(empty) empty.remove();
+      body.appendChild(makeSChip(ALL_SYMS.find(x=>x.id===symId)));
+      updateFMBtn(); updateFMCount(fm.id);
+    });
+    zone.appendChild(head); zone.appendChild(prev); zone.appendChild(body); grid.appendChild(zone);
+  });
+}
+
+function updateFMCount(fmId){
+  const count=Object.values(failurePlacements).filter(v=>v===fmId).length;
+  const el=document.getElementById('fmcount-'+fmId);
+  if(el) el.textContent=count+' placed';
+}
+
+function updateFMBtn(){
+  const all=ALL_SYMS.every(s=>failurePlacements[s.id]);
+  document.getElementById('failureCheckBtn').disabled=!all;
+}
+
+function checkFailure(){
+  failureChecked=true;
+  let correct=0;
+  ALL_SYMS.forEach(sym=>{
+    const chip=document.getElementById('schip-'+sym.id);
+    if(!chip) return;
+    if(failurePlacements[sym.id]===sym.correct){chip.classList.add('correct');correct++;}
+    else chip.classList.add('wrong');
+  });
+  sectionScores.failure={earned:correct,possible:ALL_SYMS.length};
+  document.getElementById('failureCheckBtn').style.display='none';
+  document.getElementById('failureNextBtn').style.display='inline-flex';
+}
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
+const QUESTIONS=[
+  {q:'What is the fundamental agent loop from classical AI theory?',
+   opts:['Input → Output → Stop','Perceive → Reason → Act → Observe → Repeat','Plan → Execute → Report','Think → Talk → Wait'],
+   ans:1,
+   ok:'Correct! Perceive → Reason → Act → Observe → Repeat. This loop is the foundation of all agent behavior — classical or modern.',
+   bad:'Not quite. The fundamental loop is Perceive → Reason → Act → Observe → Repeat. The "Repeat" is what makes it an agent, not a single-shot system.'},
+  {q:'Which classical agent type has NO memory, NO planning, and NO learning?',
+   opts:['Goal-Based','Utility-Based','Learning','Reactive'],
+   ans:3,
+   ok:'Correct! Reactive agents are pure stimulus → response systems. No internal model, no planning, no memory — like a thermostat.',
+   bad:'Not quite. Reactive agents have none of those capabilities — pure stimulus → response, like a thermostat.'},
+  {q:'In a modern LLM agent, what does the LLM NOT do?',
+   opts:['Task interpretation','Step decomposition','Enforce permissions and execute APIs directly','Tool selection'],
+   ans:2,
+   ok:'Correct! The LLM reasons, plans, and selects tools — but does NOT enforce permissions or execute APIs. Those live in other layers.',
+   bad:'Not quite. The LLM handles reasoning and planning, but does NOT enforce permissions or execute APIs — those are Control and Tool layer responsibilities.'},
+  {q:'In the Support Agent Anatomy, which stage is responsible for querying the carrier API for shipment tracking?',
+   opts:['Perception','Reasoning','Tools','Memory'],
+   ans:2,
+   ok:'Correct! Calling an external API for live data is a Tools stage action. Reasoning decides to use it — Tools execute it.',
+   bad:'Not quite. Querying an external API is a Tools stage action. Perception reads incoming signals; Tools call external systems to retrieve or modify data.'},
+  {q:'Which failure mode causes the agent to gradually drift away from the original objective?',
+   opts:['Poor Task Decomposition','Tool Misalignment','Feedback Ignorance','Over-Autonomy'],
+   ans:2,
+   ok:'Correct! Feedback Ignorance means errors compound silently — each wrong step makes the next worse, and the agent drifts from its goal.',
+   bad:'Not quite. Feedback Ignorance is the culprit. Without evaluating results after each action, errors compound and the agent loses track of its objective.'},
+  {q:'Utility-Based agents differ from Goal-Based agents because they:',
+   opts:['Have no memory','Can only run one step','Optimize trade-offs instead of binary goal achievement','Learn from past experience'],
+   ans:2,
+   ok:"Correct! Utility-based agents optimize across competing objectives — not just 'did I reach the goal?' but 'what's the best balance of speed, cost, and quality?'",
+   bad:'Not quite. Utility-based agents optimize trade-offs (e.g., minimize cost vs. maximize speed) rather than just checking binary goal completion.'},
+  {q:'Without stopping conditions, what does an agent do?',
+   opts:['Switches to a simpler model','Asks the user for help','Loops infinitely, burning compute and taking unintended actions','Produces a single output and exits'],
+   ans:2,
+   ok:'Correct! Without stopping logic, the agent has no mechanism to exit the loop — it retries indefinitely and potentially causes damage.',
+   bad:'Not quite. Without stopping conditions, the agent loops infinitely. The Control Layer must evaluate: Is the goal met? Did it fail? Should I escalate?'},
+];
+
+let qIdx=0,qScore=0,quizStarted=false,qAnswered=false;
+
+function initQuiz(){quizStarted=true;qIdx=0;qScore=0;showQ();}
+function showQ(){
+  qAnswered=false;
+  const q=QUESTIONS[qIdx];
+  document.getElementById('qProg').style.width=(qIdx/QUESTIONS.length*100)+'%';
+  document.getElementById('qMeta').textContent='Question '+(qIdx+1)+' of '+QUESTIONS.length;
+  document.getElementById('qScoreTxt').textContent='Score: '+qScore+' / '+qIdx;
+  document.getElementById('quizQ').textContent=q.q;
+  document.getElementById('quizFB').className='fb-box';
+  document.getElementById('quizFB').innerHTML='';
+  document.getElementById('qNextBtn').style.display='none';
+  const L=['A','B','C','D'];
+  document.getElementById('quizOpts').innerHTML=q.opts.map((o,i)=>
+    `<button class="q-opt" onclick="answerQ(${i})" id="opt${i}"><div class="opt-k">${L[i]}</div>${o}</button>`
+  ).join('');
+}
+function answerQ(i){
+  if(qAnswered) return; qAnswered=true;
+  const q=QUESTIONS[qIdx]; const ok=i===q.ans;
+  if(ok) qScore++;
+  document.querySelectorAll('.q-opt').forEach((el,idx)=>{
+    el.classList.add('disabled');
+    if(idx===q.ans) el.classList.add('correct');
+    else if(idx===i&&!ok) el.classList.add('wrong');
+  });
+  const fb=document.getElementById('quizFB');
+  fb.innerHTML=`<span class="fb-icon">${ok?'✓':'✗'}</span><span>${ok?q.ok:q.bad}</span>`;
+  fb.className='fb-box show '+(ok?'ok':'bad');
+  document.getElementById('qScoreTxt').textContent='Score: '+qScore+' / '+(qIdx+1);
+  document.getElementById('qNextBtn').style.display='inline-flex';
+  if(qIdx===QUESTIONS.length-1) document.getElementById('qNextBtn').textContent='See Results →';
+}
+function nextQ(){
+  qIdx++;
+  if(qIdx>=QUESTIONS.length){showQuizDone();return;}
+  showQ();
+}
+function showQuizDone(){
+  document.getElementById('quizActive').style.display='none';
+  document.getElementById('quizDone').style.display='block';
+  const pct=Math.round(qScore/QUESTIONS.length*100);
+  sectionScores.quiz={earned:qScore,possible:QUESTIONS.length};
+  document.getElementById('qBadge').innerHTML=`<span class="badge ${pct>=70?'b-green':'b-red'}">${qScore}/${QUESTIONS.length} · ${pct}%</span>`;
+  document.getElementById('qMsg').textContent=pct>=70
+    ?`Strong work! You scored ${pct}%. You understand the Perceive–Act loop, how classical architectures differ, and where modern LLM agents fit within that framework.`
+    :`You scored ${pct}%. Review the Loop and Agent Types sections, then try again. Focus on what each classical type can and cannot do, and where the LLM fits.`;
+  if(pct>=70) markDone('quiz');
+}
+
+// ─── RESULTS ─────────────────────────────────────────────────────────────────
+function buildResults(){
+  markDone('results');
+  const te=Object.values(sectionScores).reduce((s,x)=>s+(x.earned||0),0);
+  const tp=Object.values(sectionScores).reduce((s,x)=>s+(x.possible||0),0);
+  const pct=tp>0?Math.round((te/tp)*100):0;
+  const grade=pct>=90?{l:'Systems Architect',e:'🏆',m:'Outstanding mastery of agent mechanics.'}:
+              pct>=70?{l:'Loop Engineer',e:'🔄',m:'Solid understanding. Review what you missed.'}:
+              pct>=50?{l:'Architecture Apprentice',e:'📚',m:'Good start — revisit the slides.'}:
+                      {l:'Explorer',e:'🔍',m:'Keep learning — re-read core concepts.'};
+  const circ=2*Math.PI*52, dash=circ*(1-pct/100);
+  const breakdown=[
+    {key:'anatomy',label:'Support Agent Anatomy'},
+    {key:'failure',label:'Failure Mode Diagnosis'},
+    {key:'quiz',   label:'Knowledge Check Quiz'},
+  ];
+  const rows=breakdown.map(item=>{
+    const s=sectionScores[item.key]; if(!s) return '';
+    const p=Math.round((s.earned/s.possible)*100);
+    const col=p>=80?'var(--green)':p>=50?'var(--yellow)':'var(--GA-red)';
+    return `<div class="score-row">
+      <div class="score-dot" style="background:${col}"></div>
+      <span style="flex:1;font-size:.9rem;font-weight:500;color:var(--gray-lt)">${item.label}</span>
+      <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${p}%;background:${col}"></div></div>
+      <span style="font-size:.82rem;color:var(--gray);min-width:38px;text-align:right">${s.earned}/${s.possible}</span>
+      <span class="badge" style="background:${p>=80?'rgba(34,197,94,.15)':p>=50?'rgba(245,197,24,.15)':'rgba(232,51,58,.15)'};color:${col};min-width:38px;text-align:center">${p}%</span>
+    </div>`;
+  }).join('');
+  const takeaways=[
+    'All agents operate through the Perceive → Reason → Act → Observe → Repeat loop. The loop is what creates autonomy — without it, you have a generator, not an agent.',
+    'Modern LLM agents are hybrid architectures combining all four classical types. The LLM is a reasoning engine, not a complete agent — Tool, Memory, and Control layers provide the rest.',
+    'Most failures are architectural, not model errors. Task decomposition, tool validation, feedback evaluation, and guardrails must be deliberately designed into the system.',
+  ].map((t,i)=>`<div class="takeaway-item"><div class="tk-num">0${i+1}</div><div class="tk-txt">${t}</div></div>`).join('');
+  document.getElementById('resultsBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;padding-bottom:36px;border-bottom:1px solid var(--line);margin-bottom:32px">
+      <div class="results-ring">
+        <svg width="120" height="120" style="transform:rotate(-90deg)" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--black3)" stroke-width="8"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--GA-red)" stroke-width="8"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${dash.toFixed(1)}"
+            stroke-linecap="round" style="transition:stroke-dashoffset 1.2s ease"/>
+        </svg>
+        <div class="results-ring-txt"><div class="ring-pct">${pct}%</div><div class="ring-sub">score</div></div>
+      </div>
+      <div>
+        <div style="font-size:2rem;margin-bottom:4px">${grade.e}</div>
+        <h2 style="font-size:clamp(2rem,5vw,2.8rem);margin-bottom:6px">${grade.l}</h2>
+        <p style="color:var(--gray-lt);font-size:.95rem">${grade.m}</p>
+        <p style="color:var(--gray-dk);font-size:.82rem;margin-top:6px;font-family:'JetBrains Mono',monospace">${te} pts earned · ${tp} pts possible</p>
+      </div>
+    </div>
+    <span class="eyebrow">Score Breakdown</span>
+    <div class="card" style="padding:8px 20px;margin-bottom:28px">${rows}</div>
+    <span class="eyebrow">Key Takeaways</span>
+    <div class="card" style="padding:8px 20px;margin-bottom:24px">${takeaways}</div>
+    <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:var(--r-lg);padding:20px">
+      <p style="font-size:.92rem;color:var(--gray-lt);line-height:1.7">
+        🎉 <strong style="color:#fff">Well done!</strong> You've completed How Agents Work.<br/>
+        Next module: <strong style="color:#fff">Current Agentic AI Frameworks and Ecosystems</strong> — where you'll apply these patterns in LangChain, AutoGen, and CrewAI.
+      </p>
+    </div>`;
+}
+</script>
+</body>
+</html>
