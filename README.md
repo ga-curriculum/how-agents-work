@@ -208,7 +208,7 @@ This distinction is critical for production design: the LLM is responsible for *
 
 ## 5. Lab (60 min)
 
-*Lab details in the Lab Guide document.*
+https://pages.git.generalassemb.ly/Build-AI-Agents/How-Agents-Work/
 
 ---
 
