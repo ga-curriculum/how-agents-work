@@ -228,3 +228,7 @@ https://pages.git.generalassemb.ly/Build-AI-Agents/How-Agents-Work/
 - [LangChain Agent Documentation](https://docs.langchain.com/docs/components/agents)
 - [OpenAI Function Calling Guide](https://platform.openai.com/docs/guides/function-calling)
 - [Flowise Documentation](https://docs.flowiseai.com/)
+
+---
+
+*General Assembly · Build AI Agents · BAA 16.0 · © 2026*
