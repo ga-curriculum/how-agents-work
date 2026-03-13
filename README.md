@@ -231,4 +231,4 @@ https://pages.git.generalassemb.ly/Build-AI-Agents/How-Agents-Work/
 
 ---
 
-*General Assembly · Build AI Agents · BAA 16.0 · © 2026*
+*General Assembly · Build AI Agents · BAA 3.0 · © 2026*
